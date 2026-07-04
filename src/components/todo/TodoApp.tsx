@@ -55,6 +55,14 @@ export default function TodoApp() {
     );
   };
 
+  const handleEditTodo = (id: string, newTitle: string) => {
+    setTodos((prev) =>
+      prev.map((todo) =>
+        todo.id === id ? { ...todo, title: newTitle } : todo
+      )
+    );
+  };
+
   const handleDeleteTodo = (id: string) => {
     setTodos((prev) => prev.filter((todo) => todo.id !== id));
   };
@@ -81,6 +89,7 @@ export default function TodoApp() {
               todo={todo}
               onToggle={handleToggleTodo}
               onDelete={handleDeleteTodo}
+              onEdit={handleEditTodo}
             />
           ))}
         </div>
