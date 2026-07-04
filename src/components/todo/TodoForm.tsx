@@ -13,14 +13,12 @@ export default function TodoForm({ isOpen, onClose, onAdd }: TodoFormProps) {
   const [error, setError] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Focus input when modal opens
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => inputRef.current?.focus(), 100);
     }
   }, [isOpen]);
 
-  // Handle escape key to close
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -46,11 +44,9 @@ export default function TodoForm({ isOpen, onClose, onAdd }: TodoFormProps) {
 
   return (
     <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      {/* Backdrop click to close */}
       <div className="absolute inset-0" onClick={onClose} />
-      
+
       <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl border border-slate-100 relative z-10 animate-in fade-in zoom-in-95 duration-200">
-        {/* Close button */}
         <button
           type="button"
           onClick={onClose}
@@ -77,11 +73,10 @@ export default function TodoForm({ isOpen, onClose, onAdd }: TodoFormProps) {
                 setTitle(e.target.value);
                 if (error) setError("");
               }}
-              className={`w-full px-4 py-2.5 bg-slate-50 border rounded-xl focus:outline-none focus:ring-2 transition-all ${
-                error
-                  ? "border-red-500 focus:ring-red-100 focus:border-red-500"
-                  : "border-slate-200 focus:ring-blue-100 focus:border-blue-500"
-              }`}
+              className={`w-full px-4 py-2.5 bg-slate-50 border rounded-xl focus:outline-none focus:ring-2 transition-all ${error
+                ? "border-red-500 focus:ring-red-100 focus:border-red-500"
+                : "border-slate-200 focus:ring-blue-100 focus:border-blue-500"
+                }`}
             />
             {error && (
               <p className="text-sm text-red-500 mt-1.5 ml-1 font-medium">

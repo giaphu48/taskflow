@@ -12,6 +12,17 @@ export default function TodoItem({ todo, onToggle, onDelete, onEdit }: TodoItemP
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(todo.title);
   const inputRef = useRef<HTMLInputElement>(null);
+  const lastTapRef = useRef<number>(0);
+
+  const handleTextClick = () => {
+    const now = Date.now();
+    const DOUBLE_PRESS_DELAY = 300;
+    if (now - lastTapRef.current < DOUBLE_PRESS_DELAY) {
+      setIsEditing(true);
+    } else {
+      lastTapRef.current = now;
+    }
+  };
 
   // Tự động focus vào input khi bật chế độ edit
   useEffect(() => {
@@ -85,6 +96,7 @@ export default function TodoItem({ todo, onToggle, onDelete, onEdit }: TodoItemP
           </div>
         ) : (
           <span
+            onClick={handleTextClick}
             onDoubleClick={() => setIsEditing(true)}
             className={`text-slate-700 font-medium transition-all flex-1 cursor-text ${todo.isCompleted ? "line-through text-slate-400" : ""
               }`}
