@@ -47,6 +47,18 @@ export default function TodoApp() {
     setTodos((prev) => [newTodo, ...prev]);
   };
 
+  const handleToggleTodo = (id: string) => {
+    setTodos((prev) =>
+      prev.map((todo) =>
+        todo.id === id ? { ...todo, isCompleted: !todo.isCompleted } : todo
+      )
+    );
+  };
+
+  const handleDeleteTodo = (id: string) => {
+    setTodos((prev) => prev.filter((todo) => todo.id !== id));
+  };
+
   return (
     <div className="w-full">
       <Header onAddClick={() => setIsModalOpen(true)} />
@@ -64,7 +76,12 @@ export default function TodoApp() {
       ) : (
         <div className="flex flex-col">
           {todos.map((todo) => (
-            <TodoItem key={todo.id} todo={todo} />
+            <TodoItem
+              key={todo.id}
+              todo={todo}
+              onToggle={handleToggleTodo}
+              onDelete={handleDeleteTodo}
+            />
           ))}
         </div>
       )}
