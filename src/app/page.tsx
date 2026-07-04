@@ -1,4 +1,5 @@
 import Header from "@/components/layout/Header";
+import TodoApp from "@/components/todo/TodoApp";
 
 export default function Home() {
   return (
@@ -6,9 +7,7 @@ export default function Home() {
       <Header />
 
       <div className="flex-1 w-full max-w-screen-lg mx-auto mt-8">
-        <div className="text-center text-slate-400 mt-10">
-          Chưa có công việc nào.
-        </div>
+        <TodoApp />
       </div>
     </main>
   );
