@@ -7,30 +7,6 @@ import TodoForm from "./TodoForm";
 import { Todo } from "@/types/todo";
 
 const initialTodos: Todo[] = [
-  {
-    id: "1",
-    title: "Hoàn thành bài test thực tập Next.js",
-    isCompleted: false,
-    createdAt: 1719792000000,
-  },
-  {
-    id: "2",
-    title: "Học thêm về Tailwind CSS và Responsive",
-    isCompleted: true,
-    createdAt: 1719792060000,
-  },
-  {
-    id: "3",
-    title: "Đọc tài liệu về React Server Components",
-    isCompleted: false,
-    createdAt: 1719792120000,
-  },
-  {
-    id: "4",
-    title: "Tối ưu hóa UI/UX với Tailwind CSS và Animations",
-    isCompleted: false,
-    createdAt: 1719792180000,
-  },
 ];
 
 type FilterType = "all" | "active" | "completed";
@@ -40,6 +16,8 @@ export default function TodoApp() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [filter, setFilter] = useState<FilterType>("all");
   const [isLoaded, setIsLoaded] = useState(false);
+
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Load dữ liệu từ LocalStorage khi khởi chạy
   useEffect(() => {
@@ -94,14 +72,27 @@ export default function TodoApp() {
     setTodos((prev) => prev.filter((todo) => todo.id !== id));
   };
 
+  const handleClearCompleted = () => {
+    if (window.confirm("Bạn có chắc muốn xóa tất cả công việc đã hoàn thành?")) {
+      setTodos((prev) => prev.filter((todo) => !todo.isCompleted));
+    }
+  };
+
   // Tránh lỗi Hydration Mismatch của Next.js
   if (!isLoaded) {
     return <div className="w-full text-center text-slate-400 mt-10">Đang tải dữ liệu...</div>;
   }
 
   const filteredTodos = todos.filter((todo) => {
-    if (filter === "active") return !todo.isCompleted;
-    if (filter === "completed") return todo.isCompleted;
+    // Lọc theo trạng thái
+    if (filter === "active" && todo.isCompleted) return false;
+    if (filter === "completed" && !todo.isCompleted) return false;
+
+    // Lọc theo từ khóa tìm kiếm
+    if (searchQuery.trim() && !todo.title.toLowerCase().includes(searchQuery.trim().toLowerCase())) {
+      return false;
+    }
+
     return true;
   });
 
@@ -117,33 +108,58 @@ export default function TodoApp() {
         onAdd={handleAddTodo}
       />
 
+      {/* Tìm kiếm */}
+      <div className="mb-5 relative">
+        <input
+          type="text"
+          placeholder="Tìm kiếm công việc..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full px-4 py-3 pl-11 bg-white border border-slate-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all text-sm placeholder:text-slate-400"
+        />
+        <svg className="w-5 h-5 text-slate-400 absolute left-4 top-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </div>
+
       <div className="flex flex-col sm:flex-row justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6 gap-4">
         <span className="text-slate-500 font-medium text-sm">
           Còn <strong className="text-blue-600">{activeCount}</strong> việc chưa hoàn thành
         </span>
-        <div className="flex bg-slate-100 p-1 rounded-lg">
-          {(["all", "active", "completed"] as FilterType[]).map((f) => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
-                filter === f
+
+        <div className="flex flex-col sm:flex-row items-center gap-3">
+          <div className="flex bg-slate-100 p-1 rounded-lg">
+            {(["all", "active", "completed"] as FilterType[]).map((f) => (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${filter === f
                   ? "bg-white text-blue-600 shadow-sm"
                   : "text-slate-500 hover:text-slate-700"
-              }`}
+                  }`}
+              >
+                {f === "all" ? "Tất cả" : f === "active" ? "Chưa xong" : "Đã xong"}
+              </button>
+            ))}
+          </div>
+
+          {todos.some(t => t.isCompleted) && (
+            <button
+              onClick={handleClearCompleted}
+              className="text-sm font-medium text-red-500 hover:text-red-600 hover:bg-red-50 px-3 py-1.5 rounded-md transition-colors whitespace-nowrap"
             >
-              {f === "all" ? "Tất cả" : f === "active" ? "Chưa xong" : "Đã xong"}
+              Xóa đã xong
             </button>
-          ))}
+          )}
         </div>
       </div>
 
       {filteredTodos.length === 0 ? (
         <div className="text-center text-slate-400 mt-10 p-8 border-2 border-dashed border-slate-200 rounded-xl">
-          {filter === "all" 
-            ? "Chưa có công việc nào. Hãy thêm mới!" 
-            : filter === "active" 
-              ? "Bạn đã hoàn thành hết công việc!" 
+          {filter === "all"
+            ? "Chưa có công việc nào. Hãy thêm mới!"
+            : filter === "active"
+              ? "Bạn đã hoàn thành hết công việc!"
               : "Chưa có công việc nào hoàn thành."}
         </div>
       ) : (
