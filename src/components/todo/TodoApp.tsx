@@ -5,6 +5,22 @@ import Header from "../layout/Header";
 import TodoItem from "./TodoItem";
 import TodoForm from "./TodoForm";
 import { Todo } from "@/types/todo";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 
 const initialTodos: Todo[] = [
 ];
@@ -78,6 +94,37 @@ export default function TodoApp() {
     }
   };
 
+  // Cấu hình Drag & Drop Sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 250,
+        tolerance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      setTodos((items) => {
+        const oldIndex = items.findIndex((i) => i.id === active.id);
+        const newIndex = items.findIndex((i) => i.id === over.id);
+
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+  };
+
   // Tránh lỗi Hydration Mismatch của Next.js
   if (!isLoaded) {
     return <div className="w-full text-center text-slate-400 mt-10">Đang tải dữ liệu...</div>;
@@ -97,6 +144,7 @@ export default function TodoApp() {
   });
 
   const activeCount = todos.filter((t) => !t.isCompleted).length;
+  const isDragDisabled = filter !== "all" || searchQuery.trim() !== "";
 
   return (
     <div className="w-full">
@@ -163,17 +211,29 @@ export default function TodoApp() {
               : "Chưa có công việc nào hoàn thành."}
         </div>
       ) : (
-        <div className="flex flex-col">
-          {filteredTodos.map((todo) => (
-            <TodoItem
-              key={todo.id}
-              todo={todo}
-              onToggle={handleToggleTodo}
-              onDelete={handleDeleteTodo}
-              onEdit={handleEditTodo}
-            />
-          ))}
-        </div>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <div className="flex flex-col">
+            <SortableContext
+              items={filteredTodos.map(t => t.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              {filteredTodos.map((todo) => (
+                <TodoItem
+                  key={todo.id}
+                  todo={todo}
+                  onToggle={handleToggleTodo}
+                  onDelete={handleDeleteTodo}
+                  onEdit={handleEditTodo}
+                  isDragDisabled={isDragDisabled}
+                />
+              ))}
+            </SortableContext>
+          </div>
+        </DndContext>
       )}
     </div>
   );

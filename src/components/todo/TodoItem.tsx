@@ -1,14 +1,19 @@
+"use client";
+
 import { Todo } from "@/types/todo";
 import { useState, useRef, useEffect } from "react";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 interface TodoItemProps {
   todo: Todo;
   onToggle: (id: string) => void;
   onDelete: (id: string) => void;
   onEdit: (id: string, newTitle: string) => void;
+  isDragDisabled: boolean;
 }
 
-export default function TodoItem({ todo, onToggle, onDelete, onEdit }: TodoItemProps) {
+export default function TodoItem({ todo, onToggle, onDelete, onEdit, isDragDisabled }: TodoItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(todo.title);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -51,9 +56,42 @@ export default function TodoItem({ todo, onToggle, onDelete, onEdit }: TodoItemP
     }
   };
 
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: todo.id, disabled: isDragDisabled });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 50 : "auto",
+  };
+
   return (
-    <div className="flex items-center justify-between p-4 mb-3 bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-shadow group">
+    <div 
+      ref={setNodeRef}
+      style={style}
+      className={`flex items-center justify-between p-4 mb-3 bg-white border border-slate-200 rounded-xl transition-all group ${
+        isDragging ? "shadow-lg opacity-80 scale-[1.02]" : "shadow-sm hover:shadow-md"
+      }`}
+    >
       <div className="flex items-center gap-3 flex-1">
+        {!isDragDisabled && (
+          <button
+            className="cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-500 shrink-0 touch-none"
+            {...attributes}
+            {...listeners}
+            title="Kéo để sắp xếp"
+          >
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M8 9a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4zm8-16a2 2 0 110-4 2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4z" />
+            </svg>
+          </button>
+        )}
         <div className="relative flex items-center justify-center shrink-0">
           <input
             type="checkbox"
