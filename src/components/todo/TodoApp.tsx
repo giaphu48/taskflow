@@ -24,6 +24,42 @@ import {
 } from "@dnd-kit/sortable";
 
 const initialTodos: Todo[] = [
+  {
+    id: "1",
+    title: "Khởi tạo dự án Nextjs",
+    isCompleted: false,
+    createdAt: 1752033435647,
+  },
+  {
+    id: "2",
+    title: "Thiết lặp layout cơ bản",
+    isCompleted: false,
+    createdAt: 1752033535647,
+  },
+  {
+    id: "3",
+    title: "Tạo dựng các todo components",
+    isCompleted: false,
+    createdAt: 1783196807000,
+  },
+  {
+    id: "4",
+    title: "Hoàn thiện giao diện",
+    isCompleted: false,
+    createdAt: 1783196807000,
+  },
+  {
+    id: "5",
+    title: "Viết Unit Tests",
+    isCompleted: false,
+    createdAt: 1783196807000,
+  },
+  {
+    id: "6",
+    title: "Triển khai docker",
+    isCompleted: false,
+    createdAt: 1783196807000,
+  },
 ];
 
 type FilterType = "all" | "active" | "completed";
