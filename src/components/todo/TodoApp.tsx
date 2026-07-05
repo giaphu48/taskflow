@@ -37,12 +37,10 @@ export default function TodoApp() {
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 5;
 
-  // Reset trang khi thay đổi filter hoặc tìm kiếm
   useEffect(() => {
     setCurrentPage(1);
   }, [filter, searchQuery]);
 
-  // Load dữ liệu từ LocalStorage khi khởi chạy
   useEffect(() => {
     const saved = localStorage.getItem("taskflow-todos");
     if (saved) {
@@ -58,7 +56,6 @@ export default function TodoApp() {
     setIsLoaded(true);
   }, []);
 
-  // Lưu dữ liệu vào LocalStorage mỗi khi todos thay đổi
   useEffect(() => {
     if (isLoaded) {
       localStorage.setItem("taskflow-todos", JSON.stringify(todos));
@@ -101,7 +98,6 @@ export default function TodoApp() {
     }
   };
 
-  // Cấu hình Drag & Drop Sensors
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -133,11 +129,9 @@ export default function TodoApp() {
   };
 
   const filteredTodos = todos.filter((todo) => {
-    // Lọc theo trạng thái
     if (filter === "active" && todo.isCompleted) return false;
     if (filter === "completed" && !todo.isCompleted) return false;
 
-    // Lọc theo từ khóa tìm kiếm
     if (searchQuery.trim() && !todo.title.toLowerCase().includes(searchQuery.trim().toLowerCase())) {
       return false;
     }
@@ -147,14 +141,12 @@ export default function TodoApp() {
 
   const totalPages = Math.ceil(filteredTodos.length / ITEMS_PER_PAGE);
 
-  // Đảm bảo không bị lỗi trang khi xóa phần tử ở trang cuối
   useEffect(() => {
     if (currentPage > totalPages && totalPages > 0) {
       setCurrentPage(totalPages);
     }
   }, [totalPages, currentPage]);
 
-  // Tránh lỗi Hydration Mismatch của Next.js
   if (!isLoaded) {
     return <div className="w-full text-center text-slate-400 mt-10">Đang tải dữ liệu...</div>;
   }
@@ -169,27 +161,13 @@ export default function TodoApp() {
 
   return (
     <div className="w-full">
-      <Header onAddClick={() => setIsModalOpen(true)} />
+      <Header onAddClick={() => setIsModalOpen(true)} searchQuery={searchQuery} onSearchChange={setSearchQuery} />
 
       <TodoForm
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onAdd={handleAddTodo}
       />
-
-      {/* Tìm kiếm */}
-      <div className="mb-5 relative">
-        <input
-          type="text"
-          placeholder="Tìm kiếm công việc..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full px-4 py-3 pl-11 bg-white border border-slate-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all text-sm placeholder:text-slate-400"
-        />
-        <svg className="w-5 h-5 text-slate-400 absolute left-4 top-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-      </div>
 
       <div className="flex flex-col sm:flex-row justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6 gap-4">
         <span className="text-slate-500 font-medium text-sm">
@@ -270,8 +248,8 @@ export default function TodoApp() {
                   key={i + 1}
                   onClick={() => setCurrentPage(i + 1)}
                   className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-medium transition-colors ${currentPage === i + 1
-                      ? "bg-blue-600 text-white shadow-sm"
-                      : "text-slate-600 hover:bg-slate-100 active:bg-slate-200"
+                    ? "bg-blue-600 text-white shadow-sm"
+                    : "text-slate-600 hover:bg-slate-100 active:bg-slate-200"
                     }`}
                 >
                   {i + 1}
