@@ -29,7 +29,6 @@ export default function TodoItem({ todo, onToggle, onDelete, onEdit, isDragDisab
     }
   };
 
-  // Tự động focus vào input khi bật chế độ edit
   useEffect(() => {
     if (isEditing) {
       inputRef.current?.focus();
@@ -41,7 +40,6 @@ export default function TodoItem({ todo, onToggle, onDelete, onEdit, isDragDisab
     if (trimmedTitle && trimmedTitle !== todo.title) {
       onEdit(todo.id, trimmedTitle);
     } else {
-      // Trả lại tên cũ nếu nhập rỗng
       setEditTitle(todo.title);
     }
     setIsEditing(false);
@@ -72,12 +70,11 @@ export default function TodoItem({ todo, onToggle, onDelete, onEdit, isDragDisab
   };
 
   return (
-    <div 
+    <div
       ref={setNodeRef}
       style={style}
-      className={`flex items-center justify-between p-4 mb-3 bg-white border border-slate-200 rounded-xl transition-all group ${
-        isDragging ? "shadow-lg opacity-80 scale-[1.02]" : "shadow-sm hover:shadow-md"
-      }`}
+      className={`flex items-center justify-between p-4 mb-3 bg-white border border-slate-200 rounded-xl transition-all group ${isDragging ? "shadow-lg opacity-80 scale-[1.02]" : "shadow-sm hover:shadow-md"
+        }`}
     >
       <div className="flex items-center gap-3 flex-1">
         {!isDragDisabled && (

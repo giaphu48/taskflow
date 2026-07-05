@@ -34,6 +34,13 @@ export default function TodoApp() {
   const [isLoaded, setIsLoaded] = useState(false);
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 5;
+
+  // Reset trang khi thay đổi filter hoặc tìm kiếm
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filter, searchQuery]);
 
   // Load dữ liệu từ LocalStorage khi khởi chạy
   useEffect(() => {
@@ -125,11 +132,6 @@ export default function TodoApp() {
     }
   };
 
-  // Tránh lỗi Hydration Mismatch của Next.js
-  if (!isLoaded) {
-    return <div className="w-full text-center text-slate-400 mt-10">Đang tải dữ liệu...</div>;
-  }
-
   const filteredTodos = todos.filter((todo) => {
     // Lọc theo trạng thái
     if (filter === "active" && todo.isCompleted) return false;
@@ -143,8 +145,27 @@ export default function TodoApp() {
     return true;
   });
 
+  const totalPages = Math.ceil(filteredTodos.length / ITEMS_PER_PAGE);
+
+  // Đảm bảo không bị lỗi trang khi xóa phần tử ở trang cuối
+  useEffect(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(totalPages);
+    }
+  }, [totalPages, currentPage]);
+
+  // Tránh lỗi Hydration Mismatch của Next.js
+  if (!isLoaded) {
+    return <div className="w-full text-center text-slate-400 mt-10">Đang tải dữ liệu...</div>;
+  }
+
   const activeCount = todos.filter((t) => !t.isCompleted).length;
   const isDragDisabled = filter !== "all" || searchQuery.trim() !== "";
+
+  const paginatedTodos = filteredTodos.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
 
   return (
     <div className="w-full">
@@ -218,10 +239,10 @@ export default function TodoApp() {
         >
           <div className="flex flex-col">
             <SortableContext
-              items={filteredTodos.map(t => t.id)}
+              items={paginatedTodos.map(t => t.id)}
               strategy={verticalListSortingStrategy}
             >
-              {filteredTodos.map((todo) => (
+              {paginatedTodos.map((todo) => (
                 <TodoItem
                   key={todo.id}
                   todo={todo}
@@ -232,6 +253,39 @@ export default function TodoApp() {
                 />
               ))}
             </SortableContext>
+          </div>
+
+          <div className="flex justify-center items-center gap-2 mt-8">
+            <button
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-1.5 rounded-lg border border-slate-200 text-slate-500 text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 active:bg-slate-100"
+            >
+              Trước
+            </button>
+
+            <div className="flex items-center gap-1">
+              {Array.from({ length: Math.max(1, totalPages) }).map((_, i) => (
+                <button
+                  key={i + 1}
+                  onClick={() => setCurrentPage(i + 1)}
+                  className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-medium transition-colors ${currentPage === i + 1
+                      ? "bg-blue-600 text-white shadow-sm"
+                      : "text-slate-600 hover:bg-slate-100 active:bg-slate-200"
+                    }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={currentPage === Math.max(1, totalPages)}
+              className="px-3 py-1.5 rounded-lg border border-slate-200 text-slate-500 text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 active:bg-slate-100"
+            >
+              Sau
+            </button>
           </div>
         </DndContext>
       )}
