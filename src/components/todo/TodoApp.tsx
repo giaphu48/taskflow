@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Header from "../layout/Header";
 import TodoItem from "./TodoItem";
 import TodoForm from "./TodoForm";
+import ConfirmModal from "./ConfirmModal";
 import { Todo } from "@/types/todo";
 import {
   DndContext,
@@ -30,6 +31,7 @@ type FilterType = "all" | "active" | "completed";
 export default function TodoApp() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isClearModalOpen, setIsClearModalOpen] = useState(false);
   const [filter, setFilter] = useState<FilterType>("all");
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -96,10 +98,10 @@ export default function TodoApp() {
     setTodos((prev) => {
       const index = prev.findIndex((t) => t.id === id);
       if (index === -1) return prev;
-      
+
       const newTodos = [...prev];
       const [item] = newTodos.splice(index, 1);
-      
+
       if (direction === 'top') {
         newTodos.unshift(item);
       } else if (direction === 'bottom') {
@@ -116,9 +118,7 @@ export default function TodoApp() {
   };
 
   const handleClearCompleted = () => {
-    if (window.confirm("Bạn có chắc muốn xóa tất cả công việc đã hoàn thành?")) {
-      setTodos((prev) => prev.filter((todo) => !todo.isCompleted));
-    }
+    setTodos((prev) => prev.filter((todo) => !todo.isCompleted));
   };
 
   const sensors = useSensors(
@@ -215,7 +215,7 @@ export default function TodoApp() {
 
           {todos.some(t => t.isCompleted) && (
             <button
-              onClick={handleClearCompleted}
+              onClick={() => setIsClearModalOpen(true)}
               className="text-sm font-medium text-red-500 hover:text-red-600 hover:bg-red-50 px-3 py-1.5 rounded-md transition-colors whitespace-nowrap"
             >
               Xóa đã xong
@@ -291,6 +291,14 @@ export default function TodoApp() {
           </div>
         </DndContext>
       )}
+
+      <ConfirmModal
+        isOpen={isClearModalOpen}
+        onClose={() => setIsClearModalOpen(false)}
+        onConfirm={handleClearCompleted}
+        title="Xóa công việc đã xong"
+        message="Bạn có chắc chắn muốn xóa tất cả các công việc đã hoàn thành? Hành động này không thể hoàn tác."
+      />
     </div>
   );
 }

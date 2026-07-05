@@ -17,7 +17,7 @@ export default function Header({ onAddClick, searchQuery, onSearchChange }: Head
             <span className="text-blue-500">.</span>
           </h1>
           <p className="text-xs font-medium text-slate-500 mt-1 sm:text-sm">
-            Quản lý công việc hằng ngày hiệu quả
+            Quản lý công việc hiệu quả
           </p>
         </div>
 
