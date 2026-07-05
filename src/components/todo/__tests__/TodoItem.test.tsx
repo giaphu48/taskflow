@@ -40,7 +40,7 @@ describe('TodoItem', () => {
         isDragDisabled={false}
       />
     );
-    expect(screen.getByText('Test Todo')).toBeInTheDocument();
+    expect(screen.getByText('Test TodoItem')).toBeInTheDocument();
   });
 
   it('gọi hàm onToggle khi click vào ô checkbox', () => {
