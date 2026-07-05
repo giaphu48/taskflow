@@ -78,7 +78,7 @@ taskflow/
 └── README.md               # File tài liệu hướng dẫn
 ```
 
-## Technical Decisions (Quyết định kỹ thuật)
+## Quyết định kỹ thuật
 
 - **Next.js**: Sử dụng để tận dụng kiến trúc hiện đại (App Router) và tối ưu hóa hiệu suất (SSR/SSG).
 - **Tailwind CSS v4**: Giúp styling giao diện nhanh chóng, trực quan ngay trong component mà không cần file CSS rời.
