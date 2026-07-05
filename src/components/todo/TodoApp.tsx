@@ -92,6 +92,29 @@ export default function TodoApp() {
     setTodos((prev) => prev.filter((todo) => todo.id !== id));
   };
 
+  const handleMoveTodo = (id: string, direction: 'top' | 'bottom' | 'up' | 'down') => {
+    setTodos((prev) => {
+      const index = prev.findIndex((t) => t.id === id);
+      if (index === -1) return prev;
+      
+      const newTodos = [...prev];
+      const [item] = newTodos.splice(index, 1);
+      
+      if (direction === 'top') {
+        newTodos.unshift(item);
+      } else if (direction === 'bottom') {
+        newTodos.push(item);
+      } else if (direction === 'up') {
+        const newIndex = Math.max(0, index - ITEMS_PER_PAGE);
+        newTodos.splice(newIndex, 0, item);
+      } else if (direction === 'down') {
+        const newIndex = Math.min(newTodos.length, index + ITEMS_PER_PAGE);
+        newTodos.splice(newIndex, 0, item);
+      }
+      return newTodos;
+    });
+  };
+
   const handleClearCompleted = () => {
     if (window.confirm("Bạn có chắc muốn xóa tất cả công việc đã hoàn thành?")) {
       setTodos((prev) => prev.filter((todo) => !todo.isCompleted));
@@ -227,6 +250,7 @@ export default function TodoApp() {
                   onToggle={handleToggleTodo}
                   onDelete={handleDeleteTodo}
                   onEdit={handleEditTodo}
+                  onMove={handleMoveTodo}
                   isDragDisabled={isDragDisabled}
                 />
               ))}

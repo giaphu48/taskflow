@@ -10,14 +10,29 @@ interface TodoItemProps {
   onToggle: (id: string) => void;
   onDelete: (id: string) => void;
   onEdit: (id: string, newTitle: string) => void;
+  onMove: (id: string, direction: 'top' | 'bottom' | 'up' | 'down') => void;
   isDragDisabled: boolean;
 }
 
-export default function TodoItem({ todo, onToggle, onDelete, onEdit, isDragDisabled }: TodoItemProps) {
+export default function TodoItem({ todo, onToggle, onDelete, onEdit, onMove, isDragDisabled }: TodoItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(todo.title);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const lastTapRef = useRef<number>(0);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+    if (isMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isMenuOpen]);
 
   const handleTextClick = () => {
     const now = Date.now();
@@ -162,6 +177,48 @@ export default function TodoItem({ todo, onToggle, onDelete, onEdit, isDragDisab
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
           </svg>
         </button>
+
+        <div className="relative" ref={menuRef}>
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-2 rounded-lg transition-colors opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 focus:opacity-100"
+            title="Tùy chọn di chuyển"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+            </svg>
+          </button>
+
+          {isMenuOpen && (
+            <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg border border-slate-100 py-1 z-50 text-sm">
+              <button
+                onClick={() => { onMove(todo.id, 'top'); setIsMenuOpen(false); }}
+                className="w-full text-left px-4 py-2 hover:bg-slate-50 text-slate-700 transition-colors flex items-center gap-2"
+              >
+                Lên đầu danh sách
+              </button>
+              <button
+                onClick={() => { onMove(todo.id, 'bottom'); setIsMenuOpen(false); }}
+                className="w-full text-left px-4 py-2 hover:bg-slate-50 text-slate-700 transition-colors flex items-center gap-2"
+              >
+                Xuống cuối danh sách
+              </button>
+              <div className="h-px bg-slate-100 my-1 mx-2"></div>
+              <button
+                onClick={() => { onMove(todo.id, 'up'); setIsMenuOpen(false); }}
+                className="w-full text-left px-4 py-2 hover:bg-slate-50 text-slate-700 transition-colors flex items-center gap-2"
+              >
+                Lên 1 trang
+              </button>
+              <button
+                onClick={() => { onMove(todo.id, 'down'); setIsMenuOpen(false); }}
+                className="w-full text-left px-4 py-2 hover:bg-slate-50 text-slate-700 transition-colors flex items-center gap-2"
+              >
+                Xuống 1 trang
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
